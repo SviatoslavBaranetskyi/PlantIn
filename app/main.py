@@ -3,11 +3,22 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from app.core.config import settings
+from app.db.qdrant import get_qdrant_client
 
 
 @asynccontextmanager
-async def lifespan(_: FastAPI):
+async def lifespan(app: FastAPI):
+    client = get_qdrant_client()
+
+    try:
+        client.get_collections()
+        print("Qdrant connected")
+    except Exception as e:
+        print(f"Qdrant connection failed: {e}")
+
     yield
+
+    print("Shutting down...")
 
 
 app = FastAPI(
