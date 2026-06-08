@@ -1,3 +1,4 @@
+import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -5,6 +6,7 @@ from fastapi import FastAPI
 from app.api.routes.duplicates import router as duplicates_router
 from app.api.routes.images import router as images_router
 from app.core.config import settings
+from app.core.logging import setup_logging
 from app.db.qdrant import get_qdrant_client
 
 
@@ -12,15 +14,18 @@ from app.db.qdrant import get_qdrant_client
 async def lifespan(app: FastAPI):
     client = get_qdrant_client()
 
+    setup_logging()
+    logger = logging.getLogger(__name__)
+
     try:
         client.get_collections()
-        print("Qdrant connected")
+        logger.info("Qdrant connected")
     except Exception as e:
-        print(f"Qdrant connection failed: {e}")
+        logger.exception(f"Qdrant connection failed: {e}")
 
     yield
 
-    print("Shutting down...")
+    logger.info("Shutting down...")
 
 
 app = FastAPI(

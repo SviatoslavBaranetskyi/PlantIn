@@ -1,3 +1,4 @@
+import logging
 from functools import lru_cache
 from typing import Annotated
 from uuid import uuid4
@@ -12,6 +13,8 @@ from app.services.embedding_service import EmbeddingService
 from app.services.image_processor import ImageProcessor
 from app.services.vector_store import VectorStore
 
+logger = logging.getLogger(__name__)
+
 router = APIRouter()
 
 
@@ -22,6 +25,11 @@ def get_embedding_service() -> EmbeddingService:
 
 @router.post("/images", response_model=UploadImagesResponse)
 async def upload_images(files: Annotated[list[UploadFile], File()]):
+    logger.info(
+        "Upload request received with %s files",
+        len(files),
+    )
+
     if not files:
         raise HTTPException(status_code=400, detail="At least one image is required")
 
@@ -65,6 +73,12 @@ async def upload_images(files: Annotated[list[UploadFile], File()]):
 
     vector_store.upsert_embeddings(points)
     repo.create_request(image_ids, request_id=request_id)
+
+    logger.info(
+        "Upload request completed: request_id=%s uploaded=%s",
+        request_id,
+        len(image_ids),
+    )
 
     return UploadImagesResponse(
         request_id=request_id,
