@@ -23,5 +23,3 @@ storage/requests.json
 
 .DS_Store
 Thumbs.db
-
-uv.lock
