@@ -16,8 +16,8 @@ class ImageProcessor:
         try:
             image = Image.open(BytesIO(file_bytes))
             image.verify()
-        except Exception:
-            raise ValueError("Invalid image file")
+        except Exception as e:
+            raise ValueError("Invalid image file") from e
 
         if image.format not in self.ALLOWED_FORMATS:
             raise ValueError(f"Unsupported format: {image.format}")

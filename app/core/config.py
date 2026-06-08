@@ -8,12 +8,12 @@ class Settings(BaseSettings):
     project_name: str = "Duplicate Image Detection Service"
     project_version: str = "1.0.0"
 
-    api_prefix: str = "/api/v1"
-
     qdrant_host: str = Field(default="localhost")
     qdrant_port: int = Field(default=6333)
+    qdrant_collection: str = "images"
 
     max_image_size_mb: int = 10
+    embedding_size: int = 512
 
     similarity_threshold: float = 0.98
 

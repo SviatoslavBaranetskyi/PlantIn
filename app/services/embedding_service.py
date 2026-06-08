@@ -1,36 +1,25 @@
 import torch
-import torchvision.transforms as T
 from PIL import Image
+from torchvision.models import ResNet18_Weights, resnet18
 
 
 class EmbeddingService:
     def __init__(self):
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
 
-        self.model = torch.hub.load(
-            "pytorch/vision",
-            "vit_b_32",
-            pretrained=True,
-        ).to(self.device)
+        weights = ResNet18_Weights.DEFAULT
+        model = resnet18(weights=weights)
+        self.model = torch.nn.Sequential(*list(model.children())[:-1]).to(self.device)
 
         self.model.eval()
 
-        self.preprocess = T.Compose(
-            [
-                T.Resize((224, 224)),
-                T.ToTensor(),
-                T.Normalize(
-                    mean=[0.5, 0.5, 0.5],
-                    std=[0.5, 0.5, 0.5],
-                ),
-            ]
-        )
+        self.preprocess = weights.transforms()
 
     @torch.no_grad()
     def encode(self, image: Image.Image) -> list[float]:
         tensor = self.preprocess(image).unsqueeze(0).to(self.device)
 
-        features = self.model(tensor)
+        features = self.model(tensor).flatten(1)
 
         features = torch.nn.functional.normalize(features, p=2, dim=1)
 

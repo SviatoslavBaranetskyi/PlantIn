@@ -2,6 +2,8 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
+from app.api.routes.duplicates import router as duplicates_router
+from app.api.routes.images import router as images_router
 from app.core.config import settings
 from app.db.qdrant import get_qdrant_client
 
@@ -35,3 +37,7 @@ app = FastAPI(
 )
 async def health_check() -> dict[str, str]:
     return {"status": "ok"}
+
+
+app.include_router(images_router)
+app.include_router(duplicates_router)
